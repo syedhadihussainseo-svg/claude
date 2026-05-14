@@ -29,6 +29,7 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.39",
     "@opennextjs/cloudflare": "^1.19.9",
+    "esbuild": "0.25.4",
     "@cloudflare/workers-types": "^4.20240208.0",
     "wrangler": "^4.86.0"
   }
