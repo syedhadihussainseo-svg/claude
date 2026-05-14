@@ -6,7 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { getProduct, PRODUCTS, BADGE_LABELS, BADGE_STYLES } from '@/lib/products'
-import { Heart, ShoppingBag, Ruler, Truck, RefreshCw, Shield, ChevronRight, Eye } from 'lucide-react'
+import { Heart, ShoppingBag, Ruler, Truck, RefreshCw, Shield, ChevronRight, Eye, Zap } from 'lucide-react'
+import SizeFinderModal from '@/components/SizeFinderModal'
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>()
@@ -19,10 +20,8 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1)
   const [tab, setTab] = useState<'desc' | 'details' | 'reviews'>('desc')
   const [uploadedDesign, setUploadedDesign] = useState<string | null>(null)
-  const [aiScanning, setAiScanning] = useState(false)
-  const [aiSize, setAiSize] = useState<string | null>(null)
+  const [sizeFinderOpen, setSizeFinderOpen] = useState(false)
   const uploadRef = useRef<HTMLInputElement>(null)
-  const sizeUploadRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     document.title = product ? `${product.name} | MenZculture` : 'Product | MenZculture'
@@ -51,28 +50,6 @@ export default function ProductPage() {
     reader.readAsDataURL(file)
   }
 
-  const handleSizeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      setAiScanning(true)
-      setAiSize(null)
-      let i = 0
-      const iv = setInterval(() => {
-        i++
-        if (i > 16) {
-          clearInterval(iv)
-          setAiScanning(false)
-          setAiSize('M')
-          setActiveSize('M')
-          showToast('✓ AI recommends size M!')
-        }
-      }, 120)
-    }
-    reader.readAsDataURL(file)
-  }
-
   const handleAddToCart = () => {
     if (!activeSize) { showToast('⚠️ Please select a size'); return }
     addItem({
@@ -90,7 +67,7 @@ export default function ProductPage() {
   const related = PRODUCTS.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4)
 
   return (
-    <div className="pt-24 min-h-screen">
+    <div className="hero-gradient pt-24 min-h-screen">
       {/* Breadcrumb */}
       <div className="max-w-[1400px] mx-auto px-6 md:px-14 py-4">
         <div className="flex items-center gap-2 text-sm text-brand-gray">
@@ -149,7 +126,7 @@ export default function ProductPage() {
 
             {/* Price */}
             <div className="flex items-baseline gap-4">
-              <span className="text-4xl font-black">${product.price}</span>
+              <span className="text-4xl font-black text-gold-gradient">${product.price}</span>
               {product.oldPrice && (
                 <>
                   <span className="text-xl text-brand-gray line-through">${product.oldPrice}</span>
@@ -182,21 +159,14 @@ export default function ProductPage() {
                   Size{activeSize ? ` — ${activeSize}` : ''}
                 </p>
                 <div className="flex gap-3">
-                  <button onClick={() => sizeUploadRef.current?.click()} className="text-xs text-brand-blue hover:underline flex items-center gap-1">
-                    📸 {aiScanning ? 'Scanning...' : aiSize ? `AI: ${aiSize} ✓` : 'AI Size Finder'}
+                  <button onClick={() => setSizeFinderOpen(true)} className="text-xs text-[#00D4FF] hover:underline flex items-center gap-1 font-semibold">
+                    <Zap size={11} /> AI Size Finder
                   </button>
                   <button className="text-xs text-brand-gray hover:text-white flex items-center gap-1">
                     <Ruler size={12} /> Size Guide
                   </button>
                 </div>
               </div>
-              <input ref={sizeUploadRef} type="file" accept="image/*" className="hidden" onChange={handleSizeUpload} />
-              {aiScanning && (
-                <div className="flex items-center gap-2 text-xs text-brand-blue mb-3 bg-brand-blue/05 border border-brand-blue/20 rounded-lg px-3 py-2">
-                  <div className="w-3 h-3 rounded-full border border-brand-blue border-t-transparent animate-spin" />
-                  AI is analyzing your photo for the perfect fit...
-                </div>
-              )}
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map(s => (
                   <button key={s} onClick={() => setActiveSize(s)}
@@ -204,9 +174,8 @@ export default function ProductPage() {
                       activeSize === s
                         ? 'border-brand-gold bg-brand-gold/10 text-brand-gold'
                         : 'border-brand-border hover:border-white/40'
-                    } ${aiSize === s ? 'ring-1 ring-brand-blue ring-offset-1 ring-offset-brand-black' : ''}`}>
+                    }`}>
                     {s}
-                    {aiSize === s && <span className="block text-[8px] text-brand-blue leading-none">AI ✓</span>}
                   </button>
                 ))}
               </div>
@@ -238,7 +207,7 @@ export default function ProductPage() {
                 <button onClick={() => setQty(q => q + 1)} className="w-12 h-14 bg-brand-card hover:bg-brand-gold hover:text-brand-black text-lg font-bold transition-all">+</button>
               </div>
               <button onClick={handleAddToCart}
-                className="flex-1 bg-brand-gold text-brand-black font-bold text-base rounded-xl hover:bg-white hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(200,164,90,0.3)] transition-all flex items-center justify-center gap-2">
+                className="flex-1 btn-gold font-bold text-base rounded-2xl hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(200,164,90,0.3)] transition-all flex items-center justify-center gap-2">
                 <ShoppingBag size={20} />
                 Add to Cart — ${(product.price * qty).toFixed(2)}
               </button>
@@ -358,6 +327,14 @@ export default function ProductPage() {
           </div>
         )}
       </div>
+
+      <SizeFinderModal
+        isOpen={sizeFinderOpen}
+        onClose={() => setSizeFinderOpen(false)}
+        productName={product.name}
+        availableSizes={product.sizes}
+        onSelectSize={(size) => { setActiveSize(size); setSizeFinderOpen(false) }}
+      />
     </div>
   )
 }
