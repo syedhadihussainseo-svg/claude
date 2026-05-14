@@ -359,7 +359,7 @@ const lookbookItems = [
 
 // ---- TESTIMONIALS ----
 const reviews = [
-  { name: 'James W.', city: 'NYC', text: 'The AI size finder is genuinely magic. I've been buying the wrong size online for years. This got it right first time. The fabric quality is insane.', stars: 5, initial: 'J' },
+  { name: 'James W.', city: 'NYC', text: "The AI size finder is genuinely magic. I've been buying the wrong size online for years. This got it right first time. The fabric quality is insane.", stars: 5, initial: 'J' },
   { name: 'Sofia R.', city: 'LA',  text: 'I ordered the Obsidian tee skeptically — $89 for a t-shirt felt crazy. It\'s hands down the best tee I own. Worth every cent. Already ordered three more.', stars: 5, initial: 'S' },
   { name: 'Marcus C.', city: 'Chicago', text: 'The virtual try-on feature blew my mind. Saw exactly how the oversized graphic tee would look before buying. Arrived in 2 days. MENZ is on another level.', stars: 5, initial: 'M' },
 ]
